@@ -6,28 +6,27 @@ using System.Collections.Generic;
 
 public class Matrix<T> : IEnumerable<T>
 {
-    //IMPLEMENTAR: ESTRUCTURA INTERNA- DONDE GUARDO LOS DATOS?
-    private T[,] myMatrix;
+	private T[,] myMatrix;
 
     public Matrix(int width, int height)
     {
-        //IMPLEMENTAR: constructor
-        this.Width = width;
-        this.Height = height;
+	    Width = width;
+        Height = height;
+        Capacity = width * height;
         myMatrix = new T[width,height];
     }
 
 	public Matrix(T[,] copyFrom)
     {
-        //IMPLEMENTAR: crea una version de Matrix a partir de una matriz básica de C#
-        myMatrix = copyFrom;
-        this.Width = myMatrix.GetLength(0);
-        this.Height = myMatrix.GetLength(1);
+	    myMatrix = copyFrom;
+        Width = myMatrix.GetLength(0);
+        Height = myMatrix.GetLength(1);
+        Capacity = Width * Height;
     }
 
 	public Matrix<T> Clone() {
+		
         Matrix<T> aux = new Matrix<T>(Width, Height);
-        //IMPLEMENTAR
 
         for (int i = 0; i < Height; i++)
         {
@@ -41,9 +40,8 @@ public class Matrix<T> : IEnumerable<T>
     }
 
 	public void SetRangeTo(int x0, int y0, int x1, int y1, T item) {
-        //IMPLEMENTAR: iguala todo el rango pasado por parámetro a item
 
-        for (int i = x0; i <= x1; i++)
+		for (int i = x0; i <= x1; i++)
         {
 	        for (int j = y0; j <= y1; j++)
 	        {
@@ -52,9 +50,10 @@ public class Matrix<T> : IEnumerable<T>
         }
     }
 
-    //Todos los parametros son INCLUYENTES
+
     public List<T> GetRange(int x0, int y0, int x1, int y1) {
         List<T> l = new List<T>();
+        
         for (int i = x0; i <= x1; i++)
         {
 	        for (int j = y0; j <= y1; j++)
@@ -62,10 +61,11 @@ public class Matrix<T> : IEnumerable<T>
 		        l.Add(myMatrix[j,i]);
 	        }
         }
+        
         return l;
 	}
 
-    //Para poder igualar valores en la matrix a algo
+
     public T this[int x, int y] {
 		get
 		{
@@ -84,7 +84,13 @@ public class Matrix<T> : IEnumerable<T>
 
     public IEnumerator<T> GetEnumerator()
     {
-	    return default; //(IEnumerator)myMatrix;
+	    IEnumerator iterator = myMatrix.GetEnumerator();
+
+	    while (iterator.MoveNext())
+	    {
+		    yield return (T) iterator.Current;
+	    }
+
     }
 
 	IEnumerator IEnumerable.GetEnumerator() {
