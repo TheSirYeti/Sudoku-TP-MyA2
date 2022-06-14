@@ -17,12 +17,17 @@ public class Matrix<T> : IEnumerable<T>
     }
 
 	public Matrix(T[,] copyFrom)
-    {
-	    myMatrix = copyFrom;
-        Width = myMatrix.GetLength(0);
-        Height = myMatrix.GetLength(1);
-        Capacity = Width * Height;
-    }
+	{
+		myMatrix = new T[copyFrom.GetLength(0), copyFrom.GetLength(1)];
+		
+		for (int i = 0; i < Height; i++)
+		{
+			for(int j = 0; j < Width; i++)
+			{
+				myMatrix[j, i] = copyFrom[j, i];
+			}
+		}
+	}
 
 	public Matrix<T> Clone() {
 		
@@ -84,11 +89,12 @@ public class Matrix<T> : IEnumerable<T>
 
     public IEnumerator<T> GetEnumerator()
     {
-	    IEnumerator iterator = myMatrix.GetEnumerator();
-
-	    while (iterator.MoveNext())
+	    for (int i = 0; i < Height; i++)
 	    {
-		    yield return (T) iterator.Current;
+		    for(int j = 0; j < Width; i++)
+		    {
+			    yield return myMatrix[j, i];
+		    }
 	    }
 
     }
