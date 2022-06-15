@@ -22,7 +22,7 @@ public class Matrix<T> : IEnumerable<T>
 		
 		for (int i = 0; i < Height; i++)
 		{
-			for(int j = 0; j < Width; i++)
+			for(int j = 0; j < Width; j++)
 			{
 				myMatrix[j, i] = copyFrom[j, i];
 			}
@@ -35,7 +35,7 @@ public class Matrix<T> : IEnumerable<T>
 
         for (int i = 0; i < Height; i++)
         {
-	        for(int j = 0; j < Width; i++)
+	        for(int j = 0; j < Width; j++)
 	        {
 		        aux[j, i] = myMatrix[j, i];
 	        }
@@ -91,7 +91,7 @@ public class Matrix<T> : IEnumerable<T>
     {
 	    for (int i = 0; i < Height; i++)
 	    {
-		    for(int j = 0; j < Width; i++)
+		    for(int j = 0; j < Width; j++)
 		    {
 			    yield return myMatrix[j, i];
 		    }
