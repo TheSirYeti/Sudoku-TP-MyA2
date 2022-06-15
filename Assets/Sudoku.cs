@@ -1,7 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 
 public class Sudoku : MonoBehaviour {
@@ -70,9 +73,40 @@ public class Sudoku : MonoBehaviour {
 
 
 	//IMPLEMENTAR
-	int watchdog = 0;
+	int watchdog = 90;
 	bool RecuSolve(Matrix<int> matrixParent, int x, int y, int protectMaxDepth, List<Matrix<int>> solution)
-    {
+	{
+		watchdog--;
+
+		if (watchdog <= 0)
+		{
+			throw new Exception("WatchdogOverflow");
+		}
+
+		if (!_board[x, y].locked)
+		{
+			for (int number = 0; number < 9; number++)
+			{
+				if (CanPlaceValue(matrixParent, number, x, y))
+				{
+					matrixParent[x, y] = number;
+					_board[x, y].number = number;
+
+					solution.Add(matrixParent);
+
+					if (x > 9)
+					{
+						x = 0;
+						y++;
+					}
+
+					bool status = RecuSolve(matrixParent, x, y, protectMaxDepth, solution);
+
+					return status;
+				}
+			}
+		}
+
 		return false;
 	}
 
@@ -140,6 +174,7 @@ public class Sudoku : MonoBehaviour {
         memory = string.Format("MEM: {0:f2}MB", mem / (1024f * 1024f));
         canSolve = result ? " VALID" : " INVALID";
         feedback.text = "Pasos: " + l.Count + "/" + l.Count + " - " + memory + " - " + canSolve;
+        
     }
     
 	void GenerateValidLine(Matrix<int> mtx, int x, int y)
@@ -196,6 +231,7 @@ public class Sudoku : MonoBehaviour {
         {
             for (int x = 0; x < _board.Width; x++)
             {
+	            Debug.Log("SDK " + matrix[x, y]);
                 _board[x, y].number = matrix[x, y];
             }
         }
@@ -218,7 +254,7 @@ public class Sudoku : MonoBehaviour {
     }
     void CreateNew()
     {
-        _createdMatrix = new Matrix<int>(Tests.validBoards[15]);
+        _createdMatrix = new Matrix<int>(Tests.validBoards[14]);
         TranslateAllValues(_createdMatrix);
     }
 
@@ -281,3 +317,4 @@ public class Sudoku : MonoBehaviour {
         return aux;
     }
 }
+	

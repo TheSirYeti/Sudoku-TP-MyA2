@@ -18,8 +18,12 @@ public class Matrix<T> : IEnumerable<T>
 
 	public Matrix(T[,] copyFrom)
 	{
-		myMatrix = new T[copyFrom.GetLength(0), copyFrom.GetLength(1)];
+		Width = copyFrom.GetLength(0);
+		Height = copyFrom.GetLength(1);
+		Capacity = Width * Height;
 		
+		myMatrix = new T[Width, Height];
+
 		for (int i = 0; i < Height; i++)
 		{
 			for(int j = 0; j < Width; j++)
