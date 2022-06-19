@@ -73,8 +73,8 @@ public class Sudoku : MonoBehaviour {
 
 
 	//IMPLEMENTAR
-	int watchdog = 90;
-	bool RecuSolve(Matrix<int> matrixParent, int x, int y, int protectMaxDepth, List<Matrix<int>> solution)
+	int watchdog = 100;
+	bool RecursarTesisSolve(Matrix<int> matrixParent, int x, int y, int protectMaxDepth, List<Matrix<int>> solution)
 	{
 		watchdog--;
 
@@ -83,35 +83,43 @@ public class Sudoku : MonoBehaviour {
 			throw new Exception("WatchdogOverflow");
 		}
 
-		if (!_board[x, y].locked)
+		for (int i = y; i < 9; i++)
 		{
-			for (int number = 0; number < 9; number++)
+			for (int j = x; j < 9; j++)
 			{
-				if (CanPlaceValue(matrixParent, number, x, y))
+				if (!_board[j, i].locked && _board[j,i].isEmpty)
 				{
-					matrixParent[x, y] = number;
-					_board[x, y].number = number;
-
-					solution.Add(matrixParent);
-
-					if (x > 9)
+					Debug.Log("ITEM: [" + (j+1) + "|" + (i+1) + "]");
+					for (int value = 1; value <= 9; value++)
 					{
-						x = 0;
-						y++;
+						if (CanPlaceValue(matrixParent, value, j, i))
+						{
+							_board[j, i].number = value;
+							matrixParent[j, i] = value;
+							
+							solution.Add(matrixParent);
+
+							bool b = RecursarTesisSolve(matrixParent, j, i, 0, solution);
+
+							if(b)
+								return true;
+							
+							_board[j, i].number = 0;
+							matrixParent[j, i] = 0;
+							
+						}
 					}
-
-					bool status = RecuSolve(matrixParent, x, y, protectMaxDepth, solution);
-
-					return status;
 				}
 			}
 		}
 
+		
 		return false;
 	}
+	
+	
 
-
-    void OnAudioFilterRead(float[] array, int channels)
+	void OnAudioFilterRead(float[] array, int channels)
     {
         if(canPlayMusic)
         {
@@ -139,7 +147,7 @@ public class Sudoku : MonoBehaviour {
 		if(Input.GetKeyDown(KeyCode.R) || Input.GetMouseButtonDown(1))
             SolvedSudoku();
         else if(Input.GetKeyDown(KeyCode.C) || Input.GetMouseButtonDown(0)) 
-            CreateSudoku();	
+            CreateSudoku();
 	}
 
 	//modificar lo necesario para que funcione.
@@ -149,11 +157,12 @@ public class Sudoku : MonoBehaviour {
         nums = new List<int>();
         var solution = new List<Matrix<int>>();
         watchdog = 100000;
-        var result =false;//????
+        var result = RecursarTesisSolve(_createdMatrix, 0, 0, 0, solution);
         long mem = System.GC.GetTotalMemory(true);
         memory = string.Format("MEM: {0:f2}MB", mem / (1024f * 1024f));
         canSolve = result ? " VALID" : " INVALID";
-		//???
+        feedback.enabled = true;
+        feedback.text += "   |   " + canSolve;
     }
 
     void CreateSudoku()
@@ -231,8 +240,12 @@ public class Sudoku : MonoBehaviour {
         {
             for (int x = 0; x < _board.Width; x++)
             {
-	            Debug.Log("SDK " + matrix[x, y]);
-                _board[x, y].number = matrix[x, y];
+	            _board[x, y].number = matrix[x, y];
+
+                if (_board[x, y].number != 0)
+                {
+	                _board[x, y].locked = true;
+                }
             }
         }
     }
@@ -254,8 +267,12 @@ public class Sudoku : MonoBehaviour {
     }
     void CreateNew()
     {
-        _createdMatrix = new Matrix<int>(Tests.validBoards[14]);
-        TranslateAllValues(_createdMatrix);
+	    CreateEmptyBoard();
+	    ClearBoard();
+	    _createdMatrix = new Matrix<int>(Tests.validBoards[Tests.validBoards.Length - 1]);
+	    LockRandomCells();
+	    ClearUnlocked(_createdMatrix);
+	    TranslateAllValues(_createdMatrix);
     }
 
     bool CanPlaceValue(Matrix<int> mtx, int value, int x, int y)

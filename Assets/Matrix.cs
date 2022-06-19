@@ -63,9 +63,9 @@ public class Matrix<T> : IEnumerable<T>
     public List<T> GetRange(int x0, int y0, int x1, int y1) {
         List<T> l = new List<T>();
         
-        for (int i = x0; i <= x1; i++)
+        for (int i = y0; i < y1; i++)
         {
-	        for (int j = y0; j <= y1; j++)
+	        for (int j = x0; j < x1; j++)
 	        {
 		        l.Add(myMatrix[j,i]);
 	        }
