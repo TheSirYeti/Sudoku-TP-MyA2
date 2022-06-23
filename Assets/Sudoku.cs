@@ -18,7 +18,7 @@ public class Sudoku : MonoBehaviour {
 	Matrix<Cell> _board;
 	Matrix<int> _createdMatrix;
     List<int> posibles = new List<int>();
-	int _smallSide;
+	public int _smallSide = 3;
 	int _bigSide;
     string memory = "";
     string canSolve = "";
@@ -40,7 +40,7 @@ public class Sudoku : MonoBehaviour {
         long mem = System.GC.GetTotalMemory(true);
         feedback.text = string.Format("MEM: {0:f2}MB", mem / (1024f * 1024f));
         memory = feedback.text;
-        _smallSide = 3;
+        //_smallSide = 3;
         _bigSide = _smallSide * 3;
         frequency = frequency * Mathf.Pow(r, 2);
         CreateEmptyBoard();
@@ -100,9 +100,9 @@ public class Sudoku : MonoBehaviour {
 			}
 		}
 
-		if (!_board[x, y].locked && _board[x,y].isEmpty)
+		if (!_board[x, y].locked && _createdMatrix[x,y] == 0)
 		{
-			for (int value = 1; value <= 9; value++)
+			for (int value = 1; value <= _bigSide; value++)
 			{
 				if (CanPlaceValue(matrixParent, value, x, y))
 				{
@@ -162,18 +162,6 @@ public class Sudoku : MonoBehaviour {
 
 		while (counter < seq.Count)
 		{
-			string text = "";
-
-			for (int i = 0; i < 9; i++)
-			{
-				text = "";
-				for (int j = 0; j < 9; j++)
-				{
-					text += " | " + seq[counter][j, i];
-				}
-				Debug.Log(text);
-			}
-			
 			TranslateAllValues(seq[counter]);
 			counter++;
 			feedback.text = "Pasos: " + counter + "/" + seq.Count + " - " + memory + " - " + canSolve;
@@ -187,8 +175,8 @@ public class Sudoku : MonoBehaviour {
         StopAllCoroutines();
         nums = new List<int>();
         var solution = new List<Matrix<int>>();
-        watchdog = 100000;
-        var result = RecuSolve(_createdMatrix, 0, 0, 9, solution);
+        watchdog = 10000000;
+        var result = RecuSolve(_createdMatrix, 0, 0, _bigSide, solution);
         StartCoroutine(ShowSequence(solution));
         long mem = System.GC.GetTotalMemory(true);
         memory = string.Format("MEM: {0:f2}MB", mem / (1024f * 1024f));
@@ -199,49 +187,43 @@ public class Sudoku : MonoBehaviour {
 
     void CreateSudoku()
     {
-        StopAllCoroutines();
-        nums = new List<int>();
-        canPlayMusic = false;
-        ClearBoard();
-        List<Matrix<int>> l = new List<Matrix<int>>();
-        watchdog = 100000;
-        var result = RecuSolve(_createdMatrix, 0, 0, 9, l);
-        _createdMatrix = l[0].Clone();
-        LockRandomCells();
-        ClearUnlocked(_createdMatrix);
-        TranslateAllValues(_createdMatrix);
-        long mem = System.GC.GetTotalMemory(true);
-        memory = string.Format("MEM: {0:f2}MB", mem / (1024f * 1024f));
-        canSolve = result ? " VALID" : " INVALID";
-        feedback.text = "Pasos: " + l.Count + "/" + l.Count + " - " + memory + " - " + canSolve;
-        
+	    StopAllCoroutines();
+	    nums = new List<int>();
+	    canPlayMusic = false;
+	    ClearBoard();
+	    List<Matrix<int>> l = new List<Matrix<int>>();
+	    watchdog = 10000000;
+	    GenerateValidLine(_createdMatrix, 0, 0);
+	    var result = RecuSolve(_createdMatrix, 0, 0, _bigSide, l);
+	    Debug.Log(l.Count - 1);
+	    _createdMatrix = l[l.Count - 1].Clone();
+	    LockRandomCells();
+	    ClearUnlocked(_createdMatrix);
+	    TranslateAllValues(_createdMatrix);
+	    long mem = System.GC.GetTotalMemory(true);
+	    memory = string.Format("MEM: {0:f2}MB", mem / (1024f * 1024f));
+	    canSolve = result ? " VALID" : " INVALID";
+	    feedback.text = "Pasos: " + l.Count + "/" + l.Count + " - " + memory + " - " + canSolve;
     }
     
 	void GenerateValidLine(Matrix<int> mtx, int x, int y)
 	{
-		for (int countY = 0; countY < y; countY++)
+		int[]aux = new int[_bigSide];
+		for (int i = 0; i < _bigSide; i++) 
 		{
-			int[]aux = new int[9];
-			
-			for (int i = 0; i < 9; i++) 
-			{
-				aux [i] = i + 1;
-			}
-		
-			int numAux = 0;
-			
-			for (int j = 0; j < aux.Length; j++) 
-			{
-				int r = 1 + Random.Range(j,aux.Length);
-				numAux = aux [r-1];
-				aux [r-1] = aux [j];
-				aux [j] = numAux;
-			}
-			
-			for (int k = 0; k < aux.Length; k++) 
-			{
-				mtx [k, countY] = aux [k];
-			}
+			aux [i] = i + 1;
+		}
+		int numAux = 0;
+		for (int j = 0; j < aux.Length; j++) 
+		{
+			int r = 1 + Random.Range(j,aux.Length);
+			numAux = aux [r-1];
+			aux [r-1] = aux [j];
+			aux [j] = numAux;
+		}
+		for (int k = 0; k < aux.Length; k++) 
+		{
+			mtx [k, 0] = aux [k];
 		}
 	}
 	
