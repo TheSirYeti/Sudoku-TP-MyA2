@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Profiling;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -44,7 +45,14 @@ public class Sudoku : MonoBehaviour {
         frequency = frequency * Mathf.Pow(r, 2);
         CreateEmptyBoard();
         ClearBoard();
-        CreateNew();
+        //CreateNew();
+    }
+    
+    void Update () {
+	    if(Input.GetKeyDown(KeyCode.R) || Input.GetMouseButtonDown(1))
+		    SolvedSudoku();
+	    else if(Input.GetKeyDown(KeyCode.C) || Input.GetMouseButtonDown(0)) 
+		    CreateSudoku();
     }
 
     void ClearBoard() {
@@ -69,12 +77,10 @@ public class Sudoku : MonoBehaviour {
 			}
 		}
 	}
-	
 
 
-	//IMPLEMENTAR
 	int watchdog = 100;
-	bool RecursarTesisSolve(Matrix<int> matrixParent, int x, int y, int protectMaxDepth, List<Matrix<int>> solution)
+	bool RecuSolve(Matrix<int> matrixParent, int x, int y, int protectMaxDepth, List<Matrix<int>> solution)
 	{
 		watchdog--;
 
@@ -83,36 +89,47 @@ public class Sudoku : MonoBehaviour {
 			throw new Exception("WatchdogOverflow");
 		}
 
-		for (int i = y; i < 9; i++)
+		if (x >= protectMaxDepth)
 		{
-			for (int j = x; j < 9; j++)
+			x = 0;
+			y++;
+
+			if (y >= protectMaxDepth)
 			{
-				if (!_board[j, i].locked && _board[j,i].isEmpty)
-				{
-					Debug.Log("ITEM: [" + (j+1) + "|" + (i+1) + "]");
-					for (int value = 1; value <= 9; value++)
-					{
-						if (CanPlaceValue(matrixParent, value, j, i))
-						{
-							_board[j, i].number = value;
-							matrixParent[j, i] = value;
-							
-							solution.Add(matrixParent);
-
-							bool b = RecursarTesisSolve(matrixParent, j, i, 0, solution);
-
-							if(b)
-								return true;
-							
-							_board[j, i].number = 0;
-							matrixParent[j, i] = 0;
-							
-						}
-					}
-				}
+				return true;
 			}
 		}
 
+		if (!_board[x, y].locked && _board[x,y].isEmpty)
+		{
+			for (int value = 1; value <= 9; value++)
+			{
+				if (CanPlaceValue(matrixParent, value, x, y))
+				{
+					matrixParent[x, y] = value;
+
+					Matrix<int> aux = matrixParent.Clone();
+
+					solution.Add(aux);
+
+					bool b = RecuSolve(matrixParent, x + 1, y, protectMaxDepth, solution);
+
+					if (b)
+						return true;
+					
+					matrixParent[x, y] = 0;
+				}
+			}
+		}
+		else
+		{
+			bool b = RecuSolve(matrixParent, x + 1, y, protectMaxDepth, solution);
+
+			if (b)
+			{
+				return true;
+			}
+		}
 		
 		return false;
 	}
@@ -139,15 +156,29 @@ public class Sudoku : MonoBehaviour {
 
 	//IMPLEMENTAR - punto 3
 	IEnumerator ShowSequence(List<Matrix<int>> seq)
-    {
-        yield return new WaitForSeconds(0);
-    }
+	{
+		Debug.Log("Arranque");
+		int counter = 0;
 
-	void Update () {
-		if(Input.GetKeyDown(KeyCode.R) || Input.GetMouseButtonDown(1))
-            SolvedSudoku();
-        else if(Input.GetKeyDown(KeyCode.C) || Input.GetMouseButtonDown(0)) 
-            CreateSudoku();
+		while (counter < seq.Count)
+		{
+			string text = "";
+
+			for (int i = 0; i < 9; i++)
+			{
+				text = "";
+				for (int j = 0; j < 9; j++)
+				{
+					text += " | " + seq[counter][j, i];
+				}
+				Debug.Log(text);
+			}
+			
+			TranslateAllValues(seq[counter]);
+			counter++;
+			feedback.text = "Pasos: " + counter + "/" + seq.Count + " - " + memory + " - " + canSolve;
+			yield return new WaitForSeconds(stepDuration);
+		}
 	}
 
 	//modificar lo necesario para que funcione.
@@ -157,7 +188,8 @@ public class Sudoku : MonoBehaviour {
         nums = new List<int>();
         var solution = new List<Matrix<int>>();
         watchdog = 100000;
-        var result = RecursarTesisSolve(_createdMatrix, 0, 0, 0, solution);
+        var result = RecuSolve(_createdMatrix, 0, 0, 9, solution);
+        StartCoroutine(ShowSequence(solution));
         long mem = System.GC.GetTotalMemory(true);
         memory = string.Format("MEM: {0:f2}MB", mem / (1024f * 1024f));
         canSolve = result ? " VALID" : " INVALID";
@@ -173,8 +205,7 @@ public class Sudoku : MonoBehaviour {
         ClearBoard();
         List<Matrix<int>> l = new List<Matrix<int>>();
         watchdog = 100000;
-        GenerateValidLine(_createdMatrix, 0, 0);
-        var result =false;
+        var result = RecuSolve(_createdMatrix, 0, 0, 9, l);
         _createdMatrix = l[0].Clone();
         LockRandomCells();
         ClearUnlocked(_createdMatrix);
@@ -188,26 +219,32 @@ public class Sudoku : MonoBehaviour {
     
 	void GenerateValidLine(Matrix<int> mtx, int x, int y)
 	{
-		int[]aux = new int[9];
-		for (int i = 0; i < 9; i++) 
+		for (int countY = 0; countY < y; countY++)
 		{
-			aux [i] = i + 1;
-		}
-		int numAux = 0;
-		for (int j = 0; j < aux.Length; j++) 
-		{
-			int r = 1 + Random.Range(j,aux.Length);
-			numAux = aux [r-1];
-			aux [r-1] = aux [j];
-			aux [j] = numAux;
-		}
-		for (int k = 0; k < aux.Length; k++) 
-		{
-			mtx [k, 0] = aux [k];
+			int[]aux = new int[9];
+			
+			for (int i = 0; i < 9; i++) 
+			{
+				aux [i] = i + 1;
+			}
+		
+			int numAux = 0;
+			
+			for (int j = 0; j < aux.Length; j++) 
+			{
+				int r = 1 + Random.Range(j,aux.Length);
+				numAux = aux [r-1];
+				aux [r-1] = aux [j];
+				aux [j] = numAux;
+			}
+			
+			for (int k = 0; k < aux.Length; k++) 
+			{
+				mtx [k, countY] = aux [k];
+			}
 		}
 	}
-
-
+	
 	void ClearUnlocked(Matrix<int> mtx)
 	{
 		for (int i = 0; i < _board.Height; i++) {
@@ -241,11 +278,6 @@ public class Sudoku : MonoBehaviour {
             for (int x = 0; x < _board.Width; x++)
             {
 	            _board[x, y].number = matrix[x, y];
-
-                if (_board[x, y].number != 0)
-                {
-	                _board[x, y].locked = true;
-                }
             }
         }
     }
@@ -273,6 +305,14 @@ public class Sudoku : MonoBehaviour {
 	    LockRandomCells();
 	    ClearUnlocked(_createdMatrix);
 	    TranslateAllValues(_createdMatrix);
+
+	    foreach (var value in _board)
+	    {
+		    if (!value.isEmpty)
+		    {
+			    value.locked = true;
+		    }
+	    }
     }
 
     bool CanPlaceValue(Matrix<int> mtx, int value, int x, int y)

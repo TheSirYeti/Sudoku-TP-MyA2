@@ -77,6 +77,8 @@
       <workItem from="1655295099109" duration="5563000" />
       <workItem from="1655505062005" duration="3235000" />
       <workItem from="1655595528938" duration="11195000" />
+      <workItem from="1655920689636" duration="6408000" />
+      <workItem from="1655944815441" duration="11113000" />
     </task>
     <servers />
   </component>
@@ -88,6 +90,25 @@
   <component name="UnityUnitTestConfiguration" currentTestLauncher="EditMode" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Sudoku.cs</url>
+          <line>57</line>
+          <properties documentPath="D:\Users\JP\Documents\GitHub\Sudoku-TP-MyA2\Assets\Sudoku.cs" initialLine="56" containingFunctionPresentation="method 'ClearBoard'">
+            <startOffsets>
+              <option value="1391" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1392" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
