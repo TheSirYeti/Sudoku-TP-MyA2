@@ -34,6 +34,14 @@
   }
 }</component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
+    <configuration name="Standalone Player" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../SudokuBuild\W-MOD1-TP.exe" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="D:\Users\JP\Documents\GitHub\SudokuBuild" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <method v="2" />
+    </configuration>
     <configuration name="UnitTests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\2020.3.25f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath D:\Users\JP\Documents\GitHub\Sudoku-TP-MyA2 -testResults Logs/results.xml -testPlatform EditMode -debugCodeOptimization" />
@@ -79,7 +87,7 @@
       <workItem from="1655595528938" duration="11195000" />
       <workItem from="1655920689636" duration="6408000" />
       <workItem from="1655944815441" duration="11935000" />
-      <workItem from="1656004819576" duration="6182000" />
+      <workItem from="1656004819576" duration="7102000" />
     </task>
     <servers />
   </component>

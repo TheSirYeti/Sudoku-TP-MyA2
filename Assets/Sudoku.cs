@@ -41,7 +41,7 @@ public class Sudoku : MonoBehaviour {
         feedback.text = string.Format("MEM: {0:f2}MB", mem / (1024f * 1024f));
         memory = feedback.text;
         //_smallSide = 3;
-        _bigSide = _smallSide * 3;
+        _bigSide = _smallSide * _smallSide;
         frequency = frequency * Mathf.Pow(r, 2);
         CreateEmptyBoard();
         ClearBoard();
